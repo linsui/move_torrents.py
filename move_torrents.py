@@ -3,21 +3,16 @@
 # which can be found in the LICENSE file.
 
 import argparse
-import logging
-import os
-import sys
+from pathlib import Path
 
-from bencode import bdecode, bencode
-
+import bencode
 
 QBT_KEY = 'qBt-savePath'
 LT_KEY = 'save_path'
-FASTRESUME_EXT = '.fastresume.0'
-
-logger = logging.getLogger(__name__)
+FASTRESUME_EXT = 'fastresume'
 
 
-def update_fastresume(file, find_path, replace_path):
+def update_fastresume(file_path, find_str, replace_str):
     """
     qBittorrent stores metadata in "fastresume" files. The files are encoded in
     a format called bencode, which is used elsewhere in the BitTorrent protocol.
@@ -26,49 +21,41 @@ def update_fastresume(file, find_path, replace_path):
     replace on those paths.
     """
     # Decode the bencoded file.
-    fastresume = bdecode(file.read())
+    fastresume = bencode.decode(file_path.read_bytes())
 
     # Update the two paths inside the file.
-    fastresume[QBT_KEY] = fastresume[QBT_KEY].replace(find_path, replace_path)
-    fastresume[LT_KEY] = fastresume[LT_KEY].replace(find_path, replace_path)
+    fastresume[QBT_KEY] = fastresume[QBT_KEY].replace(find_str, replace_str)
+    fastresume[LT_KEY] = fastresume[LT_KEY].replace(find_str, replace_str)
 
     # Overwrite the file with our updated structure.
-    file.seek(0)
-    file.write(bencode(fastresume))
-    file.truncate()
+    file_path.write_bytes(bencode.encode(fastresume))
 
 
-def update_bt_backup(bt_backup_path, find_path, replace_path):
+def update_bt_backup(bt_backup_path, find_str, replace_str):
     """
     qBittorrent stores torrent metadata in a BT_BACKUP directory. This function
     walks that directory and runs a find and replace on the "fastresume" files
     for each torrent.
     """
-    logger.info('searching for fastresume files in %s' % bt_backup_path)
-    for _, _, files in os.walk(bt_backup_path):
-        found = [name for name in files if name.endswith(FASTRESUME_EXT)]
-        logger.info('found %d fastresume files' % len(found))
-        for name in found:
-            path = os.path.join(bt_backup_path, name)
-            with open(path, 'r+') as raw:
-                try:
-                    update_fastresume(raw, find_path, replace_path)
-                    logger.info('successfully updated %s' % path)
-                except:
-                    logger.exception('failed to update %s' % path)
-                    continue
+    bt_backup_path = Path(bt_backup_path)
+    for file_path in bt_backup_path.glob(f'*.{FASTRESUME_EXT}'):
+        try:
+            update_fastresume(file_path, find_str, replace_str)
+        except:
+            print(f'failed to update {file_path}')
+            continue
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Find and replace filepaths in qBittorrent v3.3+'
     )
-    parser.add_argument('--find-path',
-                        help='path to find',
+    parser.add_argument('--find-str',
+                        help='string to find',
                         type=str,
                         required=True)
-    parser.add_argument('--replace-path',
-                        help='path that replaces find_path',
+    parser.add_argument('--replace-str',
+                        help='string that replaces find_path',
                         type=str,
                         required=True)
     parser.add_argument('--bt-backup-path',
@@ -77,4 +64,4 @@ if __name__ == '__main__':
                         required=True)
     args = parser.parse_args()
 
-    update_bt_backup(args.bt_backup_path, args.find_path, args.replace_path)
+    update_bt_backup(args.bt_backup_path, args.find_str, args.replace_str)
