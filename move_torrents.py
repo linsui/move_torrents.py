@@ -31,13 +31,18 @@ def update_fastresume(file_path, find_str, replace_str):
     file_path.write_bytes(bencode.encode(fastresume))
 
 
-def update_bt_backup(bt_backup_path, find_str, replace_str):
+def update_bt_backup(bt_backup_path, find_str, replace_str, torrent_hash=None):
     """
     qBittorrent stores torrent metadata in a BT_BACKUP directory. This function
     walks that directory and runs a find and replace on the "fastresume" files
     for each torrent.
     """
     bt_backup_path = Path(bt_backup_path)
+    if torrent_hash:
+        for value in torrent_hash:
+            update_fastresume(bt_backup_path / f'{value}.{FASTRESUME_EXT}',
+                              find_str, replace_str)
+        return
     for file_path in bt_backup_path.glob(f'*.{FASTRESUME_EXT}'):
         try:
             update_fastresume(file_path, find_str, replace_str)
@@ -50,18 +55,26 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Find and replace filepaths in qBittorrent v3.3+'
     )
-    parser.add_argument('--find-str',
+    parser.add_argument('-f', '--find-str',
                         help='string to find',
                         type=str,
                         required=True)
-    parser.add_argument('--replace-str',
+    parser.add_argument('-r', '--replace-str',
                         help='string that replaces find_path',
                         type=str,
                         required=True)
-    parser.add_argument('--bt-backup-path',
+    parser.add_argument('-d', '--bt-backup-path',
                         help='path to qBittorrent BT_BACKUP directory',
                         type=str,
                         required=True)
+    parser.add_argument('-a', '--torrent_hash',
+                        action='extend',
+                        nargs='+',
+                        help='torrent hash',
+                        type=str)
     args = parser.parse_args()
 
-    update_bt_backup(args.bt_backup_path, args.find_str, args.replace_str)
+    update_bt_backup(args.bt_backup_path, args.find_str,
+                     args.replace_str, args.torrent_hash)
+
+
