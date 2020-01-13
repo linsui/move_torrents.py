@@ -6,7 +6,15 @@ Have you just renamed a directory or moved your storage to a new hard-drive and 
 
 This script only works on qBittorrent 3.3+ because in that version the location for torrent metadata was moved. Tested with qBittorrent 4.2.1 and Python 3.8 .
 
-### example usage
+## Usage
+
+1. Close your qBittorrent
+2. Move your data files
+3. Backup your torrents directory (e.g. $env:localappdata/qBittorrent/BT_backup)
+4. Run this script with strings you want to replace in data file path
+5. Reopen qBittorrent
+
+## Example
 
 ```
 # Backup the BT_BACKUP directory, in case something goes wrong.
