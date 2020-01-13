@@ -2,6 +2,8 @@
 
 Have you just renamed a directory or moved your storage to a new hard-drive and now all of your torrents need to be updated? By change fastresume file we can skip the reckeck. For more information about fastresume file, see https://www.libtorrent.org/manual-ref.html#fast-resume .
 
+*This script does not move any data. Please move them manully first. Please close qBittorrent before running this script.*
+
 This script only works on qBittorrent 3.3+ because in that version the location for torrent metadata was moved. Tested with qBittorrent 4.2.1 and Python 3.8 .
 
 ### example usage
