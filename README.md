@@ -8,11 +8,35 @@ This script only works on qBittorrent 3.3+ because in that version the location 
 
 ## Usage
 
+```
+usage: move_torrents.py [-h] -f FIND_STR -r REPLACE_STR -d BT_BACKUP_PATH
+                        [-a TORRENT_HASH [TORRENT_HASH ...]]
+
+Find and replace filepaths in qBittorrent v3.3+
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -f FIND_STR, --find-str FIND_STR
+                        string to find
+  -r REPLACE_STR, --replace-str REPLACE_STR
+                        string that replaces find_path
+  -d BT_BACKUP_PATH, --bt-backup-path BT_BACKUP_PATH
+                        path to qBittorrent BT_BACKUP directory
+  -a TORRENT_HASH [TORRENT_HASH ...], --torrent_hash TORRENT_HASH [TORRENT_HASH ...]
+                        torrent hash
+```
+
+### Move all torrents
+
 1. Close your qBittorrent
 2. Move your data files
 3. Backup your torrents directory (e.g. $env:localappdata/qBittorrent/BT_backup)
 4. Run this script with strings you want to replace in data file path
 5. Reopen qBittorrent
+
+### Move a torrents
+
+Similiar as above but you need to copy hash of torrents from qBittorrent first.
 
 ## Example
 
